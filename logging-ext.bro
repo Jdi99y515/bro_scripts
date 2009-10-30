@@ -6,9 +6,10 @@ export {
 		direction:    Direction &default=All;
 		split:        bool      &default=F;
 		raw_output:   bool      &default=F;
-		log:          file      &raw_output &optional;
-		outbound_log: file      &raw_output &optional;
-		inbound_log:  file      &raw_output &optional;
+		header:       string    &default="";
+		log:          file      &optional;
+		outbound_log: file      &optional;
+		inbound_log:  file      &optional;
 	};
 	
 	# Where the data for knowing how to log is stored.
@@ -18,12 +19,12 @@ export {
 	global choose: function(a: string, server: addr): file;
 	global open_log_files: function(a: string);
 	global create_logs: function(a: string, d: Direction, split: bool, raw: bool);
+	global define_header: function(a: string, h: string);
 
 	# This is dumb, but it helps avoid needing to duplicate code on the
 	# printing side.
 	const null_file: file = open_log_file("null");
 }
-
 
 function choose(a: string, server: addr): file
 	{
@@ -44,6 +45,9 @@ function choose(a: string, server: addr): file
 		}
 	}
 
+# TODO: remove the print and uncomment the file_opened event below
+#       when bro has the file_opened event.  this is broken until then
+#       because file rotation does not reprint the header.
 function open_log_files(a: string)
 	{
 	local i = logs[a];
@@ -58,6 +62,8 @@ function open_log_files(a: string)
 			enable_raw_output(i$inbound_log);
 			enable_raw_output(i$outbound_log);
 			}
+		print i$inbound_log, i$header;
+		print i$outbound_log, i$header;
 		}
 	else
 		{
@@ -66,12 +72,32 @@ function open_log_files(a: string)
 			{
 			enable_raw_output(i$log);
 			}
+		print i$log, i$header;
 		}
 	}
 
 function create_logs(a: string, d: Direction, split: bool, raw: bool)
 	{
 	logs[a] = [$direction=d, $split=split, $raw_output=raw];
+	}
+	
+function define_header(a: string, h: string)
+	{
+	local i = logs[a];
+	i$header = h;
+	}
+
+#event file_opened(f: file) &priority=10
+event rotate_interval(f: file) &priority=-1
+	{
+	local fn = get_file_name(f);
+	local log_type = gsub(fn, /-(in|out)bound/, "");
+	if ( log_type in logs )
+		{
+		local i = logs[log_type];
+		if ( i$header != "" )
+			print f, i$header;
+		}
 	}
 
 # This is a hack.  The null file is used as /dev/null by all
