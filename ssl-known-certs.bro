@@ -42,7 +42,7 @@ event ssl_certificate(c: connection, cert: X509, is_server: bool)
 	if ( [c$id$resp_h, c$id$resp_p, cert$subject] !in certs )
 		{
 		add certs[c$id$resp_h, c$id$resp_p, cert$subject];
-		local log = LOG::get_file("ssl-known-certs", info$c$id$orig_h, F);
+		local log = LOG::get_file("ssl-known-certs", c$id$resp_h, F);
 		print log, cat_sep("\t", "\\N", c$id$resp_h, fmt("%d", c$id$resp_p), cert$subject);
 
 	    if(is_local_addr(c$id$resp_h))
