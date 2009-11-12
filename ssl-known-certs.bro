@@ -12,7 +12,7 @@ export {
 	
 	# The hosts that should be logged.
 	const split_log_file = F &redef;
-	const logging = All &redef;
+	const logging = Outbound &redef;
 
 	redef enum Notice += {
 		# Raised when a non-local name is found in the CN of a SSL cert served
@@ -34,7 +34,7 @@ event ssl_certificate(c: connection, cert: X509, is_server: bool)
 	#add c$service["SSL"];
 	event protocol_confirmation(c, ANALYZER_SSL, 0);
 	
-	if ( !resp_matches_hosts(c$id$resp_h, logged_hosts) )
+	if ( !orig_matches_direction(c$id$resp_h, logging) )
 		return;
 	
 	lookup_ssl_conn(c, "ssl_certificate", T);
