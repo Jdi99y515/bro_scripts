@@ -12,7 +12,7 @@ export {
 	
 	# The hosts that should be logged.
 	const split_log_file = F &redef;
-	const logging = Outbound &redef;
+	const logged_hosts: Hosts = LocalHosts &redef;
 
 	redef enum Notice += {
 		# Raised when a non-local name is found in the CN of a SSL cert served
@@ -23,7 +23,7 @@ export {
 
 event bro_init()
 {
-    LOG::create_logs("ssl-known-certs", logging, split_log_file, T);
+    LOG::create_logs("ssl-known-certs", All, split_log_file, T);
     LOG::define_header("ssl-known-certs", cat_sep("\t", "\\N", "resp_h", "resp_p", "subject"));
 }
 
@@ -34,7 +34,7 @@ event ssl_certificate(c: connection, cert: X509, is_server: bool)
 	#add c$service["SSL"];
 	event protocol_confirmation(c, ANALYZER_SSL, 0);
 	
-	if ( !orig_matches_direction(c$id$resp_h, logging) )
+	if ( !resp_matches_hosts(c$id$resp_h, logged_hosts) )
 		return;
 	
 	lookup_ssl_conn(c, "ssl_certificate", T);
