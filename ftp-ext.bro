@@ -11,7 +11,7 @@ type ftp_ext_session_info: record {
 	reply_msg: string &default="";
 	
 	# This is internal state tracking.
-	full: bool &default=F;
+	ready: bool &default=F;
 };
 
 # Define the generic ftp-ext event that can be handled from other scripts
@@ -33,21 +33,22 @@ event ftp_request(c: connection, command: string, arg: string) &priority=10
 	{
 	if ( c$id !in ftp_ext_sessions ) 
 		ftp_ext_sessions[c$id] = new_ftp_ext_session();
-		
+	
 	local sess_ext = ftp_ext_sessions[c$id];
-	# Throw the ftp_ext event if the session record is "full".
+	
+	# Throw the ftp_ext event if the session record is "ready".
 	# This will make sure we get the last reply from the previous command.
-	if ( sess_ext$full )
+	if ( sess_ext$ready )
 		{
-		event ftp_ext(c$id, sess_ext);
-		sess_ext$full=F;
+		# Copy the sess_ext variable because modifications to it can encounter
+		# race conditions with the event dispatching system.
+		event ftp_ext(c$id, copy(sess_ext));
+		sess_ext$ready=F;
 		}
 	
-	if ( command == "USER" )
-		sess_ext$username=arg;
-	
-	if ( command == "PASS" )
-		sess_ext$password=arg;
+	# Update the session's command everytime (after potentially dispatching
+	# the ftp_ext event).
+	sess_ext$command = command;
 	
 	if ( command == "RETR" || command == "STOR" )
 		{
@@ -56,18 +57,17 @@ event ftp_request(c: connection, command: string, arg: string) &priority=10
 		# Move the request time into the ext session information
 		sess_ext$request_t = sess$request_t;
 		
-		# If an anonymous user logged in, record what they used as a password.
-		local userpass = ( sess_ext$username in guest_ids ) ?
-		                 fmt("%s:%s", sess_ext$username, sess_ext$password) :
-		                 sess_ext$username;
-		userpass=gsub(userpass, /@/, "%40");
-		
 		# If the start directory is unknown, record it as /.
 		local pathfile = sub(absolute_path(sess, arg), /<unknown>/, "/.");
 		
-		sess_ext$url = fmt("ftp://%s@%s%s", userpass, c$id$resp_h, pathfile);
-		sess_ext$command = command;
+		sess_ext$url = fmt("ftp://%s%s", c$id$resp_h, pathfile);
 		}
+		
+	else if ( command == "USER" )
+		sess_ext$username=arg;
+
+	else if ( command == "PASS" )
+		sess_ext$password=arg;
 	}
 
 event ftp_reply(c: connection, code: count, msg: string, cont_resp: bool)
@@ -78,15 +78,15 @@ event ftp_reply(c: connection, code: count, msg: string, cont_resp: bool)
 	if ( c$id !in ftp_ext_sessions ) return;
 
 	local sess_ext = ftp_ext_sessions[c$id];
-
+	
 	if ( sess_ext$command == "RETR" ||
 	     sess_ext$command == "STOR" )
 		{
 		sess_ext$reply_code = code;
 		sess_ext$reply_msg = msg;
 		
-		# We are considering the record "full" once the reply has been recorded.
-		sess_ext$full = T;
+		# We are considering the record "ready" once the reply has been recorded.
+		sess_ext$ready = T;
 		}
 	}
 
@@ -94,9 +94,7 @@ event connection_state_remove(c: connection)
 	{
 	if ( c$id in ftp_ext_sessions )
 		{
-		local sess_ext = ftp_ext_sessions[c$id];
-		if ( sess_ext$full )
-			event ftp_ext(c$id, sess_ext);
+		event ftp_ext(c$id, ftp_ext_sessions[c$id]);
 		delete ftp_ext_sessions[c$id];
 		}
 	}
