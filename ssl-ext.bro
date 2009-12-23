@@ -12,7 +12,7 @@ export {
 	
 	# The hosts that should be logged.
 	const split_log_file = F &redef;
-	const logged_hosts: Hosts = LocalHosts &redef;
+	const logged_hosts = LocalHosts &redef;
 
 	redef enum Notice += {
 		# Raised when a non-local name is found in the CN of a SSL cert served
