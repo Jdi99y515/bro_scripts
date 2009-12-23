@@ -103,24 +103,25 @@ export {
 		/(url=http:.*){4}/ | 
 		# more that 4 html links is also suspicious
 		/(a.href(=|%3[dD]).*){4}/ &redef;
-	const http_forwarded_headers = {
-		"HTTP_FORWARDED",
-		"FORWARDED",
-		"HTTP_X_FORWARDED_FOR",
-		"X_FORWARDED_FOR",
-		"HTTP_X_FORWARDED_FROM",
-		"X_FORWARDED_FROM",
-		"HTTP_CLIENT_IP",
-		"CLIENT_IP",
-		"HTTP_FROM",
-		"FROM",
-		"HTTP_VIA",
-		"VIA",
-		"HTTP_XROXY_CONNECTION",
-		"XROXY_CONNECTION",
-		"HTTP_PROXY_CONNECTION",
-		"PROXY_CONNECTION",
-	} &redef;
+		
+		const http_forwarded_headers = {
+		  "HTTP_FORWARDED",
+		  "FORWARDED",
+		  "HTTP_X_FORWARDED_FOR",
+		  "X_FORWARDED_FOR",
+		  "HTTP_X_FORWARDED_FROM",
+		  "X_FORWARDED_FROM",
+		  "HTTP_CLIENT_IP",
+		  "CLIENT_IP",
+		  "HTTP_FROM",
+		  "FROM",
+		  "HTTP_VIA",
+		  "VIA",
+		  "HTTP_XROXY_CONNECTION",
+		  "XROXY_CONNECTION",
+		  "HTTP_PROXY_CONNECTION",
+		  "PROXY_CONNECTION",
+		} &redef;
 
 	global conn_info: table[conn_id] of http_ext_session_info 
 		&read_expire=5mins
