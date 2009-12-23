@@ -7,12 +7,16 @@ export {
 	const local_domains = /(^|\.)(osu|ohio-state)\.edu$/ |
 	                      /(^|\.)akamai(tech)?\.net$/ &redef;
 
+	# If set to T, this will split inbound and outbound transactions
+	# into separate files.  F merges everything into a single file.
+	const split_log_file = F &redef;
+	
+	# Which SSH logins to record.
+	# Choices are: LocalHosts, RemoteHosts, AllHosts, NoHosts
+	const logging = LocalHosts &redef;
+	
 	# The list of all detected certs.  This prevents over-logging.
 	global certs: set[addr, port, string] &create_expire=1day &synchronized;
-	
-	# The hosts that should be logged.
-	const split_log_file = F &redef;
-	const logged_hosts = LocalHosts &redef;
 
 	redef enum Notice += {
 		# Raised when a non-local name is found in the CN of a SSL cert served
@@ -22,19 +26,21 @@ export {
 }
 
 event bro_init()
-{
-    LOG::create_logs("ssl-known-certs", All, split_log_file, T);
-    LOG::define_header("ssl-known-certs", cat_sep("\t", "\\N", "resp_h", "resp_p", "subject"));
-}
-
+	{
+	LOG::create_logs("ssl-ext", logging, split_log_file, T);
+	LOG::define_header("ssl-ext", cat_sep("\t", "\\N",
+	                                      "ts",
+	                                      "host", "port",
+	                                      "cert_subject"));
+	}
 
 event ssl_certificate(c: connection, cert: X509, is_server: bool)
 	{
 	# The ssl analyzer doesn't do this yet, so let's do it here.
-	#add c$service["SSL"];
-	event protocol_confirmation(c, ANALYZER_SSL, 0);
+	if ( is_server )
+		event protocol_confirmation(c, ANALYZER_SSL, 0);
 	
-	if ( !addr_matches_hosts(c$id$resp_h, logged_hosts) )
+	if ( !addr_matches_hosts(c$id$resp_h, logging) )
 		return;
 	
 	lookup_ssl_conn(c, "ssl_certificate", T);
@@ -42,9 +48,12 @@ event ssl_certificate(c: connection, cert: X509, is_server: bool)
 	if ( [c$id$resp_h, c$id$resp_p, cert$subject] !in certs )
 		{
 		add certs[c$id$resp_h, c$id$resp_p, cert$subject];
-		local log = LOG::get_file_by_id("ssl-known-certs", c$id, F);
-		print log, cat_sep("\t", "\\N", c$id$resp_h, fmt("%d", c$id$resp_p), cert$subject);
-
+		
+		local log = LOG::get_file_by_addr("ssl-ext", c$id$resp_h, F);
+		print log, cat_sep("\t", "\\N", 
+		                   network_time(),
+		                   c$id$resp_h, port_to_count(c$id$resp_p), 
+		                   cert$subject);
 	    if(is_local_addr(c$id$resp_h))
 	        {
 	        local parts = split_all(cert$subject, /CN=[^\/]+/);
@@ -59,6 +68,6 @@ event ssl_certificate(c: connection, cert: X509, is_server: bool)
 	                }
 	            }
 	        }
-	    }
+		}
 	}
 
