@@ -5,15 +5,16 @@
 @load smtp-ext
 
 export {
-    global smtp_metrics: table[string] of count &default=0;
-    global smtp_metrics_interval = +2sec;
+    global smtp_metrics: table[string] of count &default=0 &synchronized;
+    global smtp_metrics_interval = +60sec;
+    const smtp_metrics_log = open_log_file("smtp-ext-metrics");
 }
 
 event write_stats()
     {
     if (smtp_metrics["total"]!=0)
         {
-        print fmt("smtp_metrics time=%.6f total=%d inbound=%d outbound=%d inbound_err=%d outbound_err=%d",
+        print smtp_metrics_log, fmt("smtp_metrics time=%.6f total=%d inbound=%d outbound=%d inbound_err=%d outbound_err=%d",
             network_time(),
             smtp_metrics["total"],
             smtp_metrics["inbound"],
@@ -27,7 +28,7 @@ event write_stats()
 
 event bro_init()
     {
-    LOG::create_logs("smtp-ext-metrics", All, F, T);
+    set_buf(smtp_metrics_log, F);
     schedule smtp_metrics_interval { write_stats() };
     }
 
