@@ -10,7 +10,7 @@ export {
     const http_metrics_log = open_log_file("http-ext-metrics");
 }
 
-event write_stats()
+event http_write_stats()
     {
     if (http_metrics["total"]!=0)
         {
@@ -22,13 +22,13 @@ event write_stats()
             http_metrics["exe_download"]);
         clear_table(http_metrics);
         }
-    schedule http_metrics_interval { write_stats() };
+    schedule http_metrics_interval { http_write_stats() };
     }
 
 event bro_init()
     {
     set_buf(http_metrics_log, F);
-    schedule http_metrics_interval { write_stats() };
+    schedule http_metrics_interval { http_write_stats() };
     }
 
 

@@ -10,7 +10,7 @@ export {
     const smtp_metrics_log = open_log_file("smtp-ext-metrics");
 }
 
-event write_stats()
+event smtp_write_stats()
     {
     if (smtp_metrics["total"]!=0)
         {
@@ -23,13 +23,13 @@ event write_stats()
             smtp_metrics["outbound_err"]);
         clear_table(smtp_metrics);
         }
-    schedule smtp_metrics_interval { write_stats() };
+    schedule smtp_metrics_interval { smtp_write_stats() };
     }
 
 event bro_init()
     {
     set_buf(smtp_metrics_log, F);
-    schedule smtp_metrics_interval { write_stats() };
+    schedule smtp_metrics_interval { smtp_write_stats() };
     }
 
 
