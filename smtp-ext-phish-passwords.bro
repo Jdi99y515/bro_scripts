@@ -11,7 +11,7 @@ export {
         SMTP_PossiblePWPhish,
         SMTP_PossiblePWPhishReply,
     };
-    global phishing_counter: table[string] of count &default=0 &write_expire=1hr &synchronized;
+    global phishing_counter: table[string] of count &default=0 &create_expire=1hr &synchronized;
     global phishing_reply_tos: set[string] &synchronized &redef;
     global phishing_ignore_froms: set[string] &redef;
     global phishing_threshold = 50;
