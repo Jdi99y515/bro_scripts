@@ -60,7 +60,7 @@ event smtp_ext(id: conn_id, si: smtp_ext_session_info)
         for (to in si$rcptto){
             if(to in phishing_reply_tos){
                 NOTICE([$note=SMTP_PossiblePWPhishReply,
-                        $msg=fmt("%s replied to %s", si$mailfrom, to),
+                        $msg=fmt("%s replied to %s - %s", si$mailfrom, to, si$subject),
                         $sub=si$mailfrom
                       ]);
             }
