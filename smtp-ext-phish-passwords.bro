@@ -13,7 +13,13 @@ export {
     };
     global phishing_counter: table[string] of count &default=0 &write_expire=1hr &synchronized;
     global phishing_reply_tos: set[string] &synchronized &redef;
+    global phishing_ignore_froms: set[string] &redef;
     global phishing_threshold = 50;
+
+    const phish_keywords =
+          /[pP][aA][sS][sS][wW][oO][rR][dD]/
+        | /[uU][sS][eE][rR].?[nN][aA][mM][eE]/
+        | /[nN][eE][tT][iI][dD]/ &redef;
 }
 
 
@@ -26,7 +32,7 @@ event bro_init()
                                           "resp_h", "resp_p",
                                           "helo", "message-id", "in-reply-to", 
                                           "mailfrom", "rcptto",
-                                          "date", "from", "reply_to", "to",
+                                          "date", "from", "reply_to", "to", "subject",
                                           "files", "last_reply", "x-originating-ip",
                                           "path", "is_webmail", "agent"));
 }
@@ -44,7 +50,7 @@ event smtp_data(c: connection, is_orig: bool, data: string)
     if(is_local_addr(c$id$orig_h))
         return;
     # look for 'password'
-    if(/[pP][aA][sS][sS][wW][oO][rR][dD]/ in data)
+    if(phish_keywords in data)
         add smtp_password_conns[c$id];
 }
 
@@ -62,15 +68,21 @@ event smtp_ext(id: conn_id, si: smtp_ext_session_info)
     } else {
         if (id !in smtp_password_conns)
             return;
+        if(si$mailfrom in phishing_ignore_froms)
+            return;
         if(++(phishing_counter[si$mailfrom]) > phishing_threshold){
+            local to_add ="";
             if(si$reply_to != "")
-                add phishing_reply_tos[si$reply_to];
+                to_add = si$reply_to;
             else 
-                add phishing_reply_tos[si$mailfrom];
-            NOTICE([$note=SMTP_PossiblePWPhish,
-                    $msg=fmt("%s(%s) may be phishing", si$mailfrom, si$reply_to),
-                    $sub=si$mailfrom
-                  ]);
+                to_add = si$mailfrom;
+            if(to_add !in phishing_reply_tos){
+                add phishing_reply_tos[to_add];
+                NOTICE([$note=SMTP_PossiblePWPhish,
+                        $msg=fmt("%s(%s) may be phishing - %s", si$mailfrom, si$reply_to, si$subject),
+                        $sub=si$mailfrom
+                      ]);
+            }
         }
 
         local log = LOG::get_file_by_id("password-mail", id, F);
@@ -86,6 +98,7 @@ event smtp_ext(id: conn_id, si: smtp_ext_session_info)
                     si$from, 
                     si$reply_to, 
                     fmt_str_set(si$to, /["']/),
+                    si$subject,
                     fmt_str_set(si$files, /["']/),
                     si$last_reply, 
                     si$x_originating_ip,
