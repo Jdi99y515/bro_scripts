@@ -70,7 +70,8 @@ event smtp_ext(id: conn_id, si: smtp_ext_session_info)
             return;
         if(si$mailfrom in phishing_ignore_froms)
             return;
-        if(++(phishing_counter[si$mailfrom]) > phishing_threshold){
+        phishing_counter[si$mailfrom] += |si$rcptto|;
+        if(phishing_counter[si$mailfrom] > phishing_threshold){
             local to_add ="";
             if(si$reply_to != "")
                 to_add = si$reply_to;
