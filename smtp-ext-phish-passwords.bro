@@ -61,6 +61,7 @@ event smtp_ext(id: conn_id, si: smtp_ext_session_info)
             if(to in phishing_reply_tos){
                 NOTICE([$note=SMTP_PossiblePWPhishReply,
                         $msg=fmt("%s replied to %s - %s", si$mailfrom, to, si$subject),
+                        $id=id,
                         $sub=si$mailfrom
                       ]);
             }
@@ -81,6 +82,7 @@ event smtp_ext(id: conn_id, si: smtp_ext_session_info)
                 add phishing_reply_tos[to_add];
                 NOTICE([$note=SMTP_PossiblePWPhish,
                         $msg=fmt("%s(%s) may be phishing - %s", si$mailfrom, si$reply_to, si$subject),
+                        $id=id,
                         $sub=si$mailfrom
                       ]);
             }
