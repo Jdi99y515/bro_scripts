@@ -76,7 +76,9 @@ event smtp_ext(id: conn_id, si: smtp_ext_session_info)
             local to_add ="";
             if(si$reply_to != "")
                 to_add = si$reply_to;
-            else 
+            else if(si$from != "")
+                to_add = si$from;
+            else
                 to_add = si$mailfrom;
             if(to_add !in phishing_reply_tos){
                 add phishing_reply_tos[to_add];
