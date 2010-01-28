@@ -6,8 +6,8 @@
 module SSH;
 
 export {
-    global ssh_attacked: table[addr] of addr_set &create_expire=30mins;# default isn't working &default=function(a:addr):addr_set { print a;return set();};
-    global libssh_scanners: set[addr] &read_expire=1hr;
+    global ssh_attacked: table[addr] of addr_set &create_expire=30mins &synchronized;# default isn't working &default=function(a:addr):addr_set { print a;return set();};
+    global libssh_scanners: set[addr] &create_expire=10mins &synchronized;
     const subnet_threshold = 3 &redef;
 
     redef enum Notice += {
