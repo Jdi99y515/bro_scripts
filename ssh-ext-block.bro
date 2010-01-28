@@ -1,6 +1,7 @@
 @load global-ext
 @load ssh-ext
 @load subnet-helper
+@load ipblocker
 @load notice
 
 module SSH;
@@ -15,15 +16,8 @@ export {
     };
 }
 
-function notice_exec_test(n: notice_info, a: NoticeAction): NoticeAction
-{
-    #execute_with_notice("/usr/local/bin/bro_ipblocker_block", n);
-    execute_with_notice("/tmp/test", n);
-    return NOTICE_ALARM_ALWAYS;
-}
-
 redef notice_action_filters += {
-    [SSH_Libssh_Scanner] = notice_exec_test,
+    [SSH_Libssh_Scanner] = notice_exec_ipblocker,
 };
 
 
