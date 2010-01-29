@@ -14,6 +14,9 @@ export {
     redef enum Notice += {
         SSH_Libssh_Scanner,
     };
+    const scanner_clients = 
+        /libssh/
+      | /dropbear/ &redef; 
 }
 
 redef notice_action_filters += {
@@ -24,7 +27,7 @@ redef notice_action_filters += {
 event ssh_ext(id: conn_id, si: ssh_ext_session_info) &priority=-10
 {
     if(is_local_addr(id$orig_h)  ||
-       /libssh/ !in si$client    ||
+       scanner_clients !in si$client ||
        si$status == "success")
         return;
 
