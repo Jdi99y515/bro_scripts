@@ -1,6 +1,7 @@
 function notice_exec_ipblocker(n: notice_info, a: NoticeAction): NoticeAction
 {
-    execute_with_notice("/usr/local/bin/bro_ipblocker_block", n);
+    local cmd = fmt("lckdo /tmp/bro_ipblocker_%s /usr/local/bin/bro_ipblocker_block", n$id$orig_h);
+    execute_with_notice(cmd, n);
     return NOTICE_ALARM_ALWAYS;
 }
 
