@@ -2,8 +2,6 @@
 @load notice
 global rdp_connection: event(c: connection);
 
-module RDP;
-
 @load signatures
 redef signature_files += "rdp.sig";
 redef signature_actions += { ["dpd_rdp"] = SIG_IGNORE };
