@@ -162,7 +162,7 @@ event smtp_reply(c: connection, is_orig: bool, code: count, cmd: string,
 		conn_info[id]$last_reply = fmt("%d %s", code, msg);
 
 		# Raise a notice when an SMTP error about a block list is discovered.
-		if ( smtp_bl_error_messages in msg )
+		if ( smtp_bl_error_messages in msg && is_local_addr(c$id$orig_h))
 			{
 			local note = SMTP_BL_Error_Message;
 			local message = fmt("%s received an error message mentioning an SMTP block list", c$id$orig_h);
