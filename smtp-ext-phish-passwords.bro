@@ -106,7 +106,7 @@ event smtp_ext(id: conn_id, si: smtp_ext_session_info)
                     si$subject,
                     fmt_str_set(si$files, /["']/),
                     si$last_reply, 
-                    si$x_originating_ip,
+                    si$x_originating_ip == 0.0.0.0 ? "" : fmt("%s", si$x_originating_ip),
                     si$path,
                     si$is_webmail,
                     si$agent);
