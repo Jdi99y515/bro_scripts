@@ -3,7 +3,7 @@ global subnet_admins: table[subnet] of string &redef;
 
 function notice_email_subnet_admins(n: notice_info, a: NoticeAction): NoticeAction
 {
-    local id = n$conn$id;
+    local id = n$id;
     local host = is_local_addr(id$orig_h) ? id$orig_h : id$resp_h;
     local admin = "";
 
