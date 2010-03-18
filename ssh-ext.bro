@@ -67,7 +67,12 @@ export {
 #redef notice_policy += {
 #	# Send email if a successful ssh login happens from or to a watched country
 #	[$pred(n: notice_info) = 
-#		{ return (n$note == SSH::SSH_Login && n$sub in SSH::watched_countries); },
+#		{ return (n$note == SSH::SSH_Login && n$aux["country"] in SSH::watched_countries); },
+#	 $result = NOTICE_EMAIL],
+#
+#	# Send email if a successful ssh login happens from a strange client version
+#	[$pred(n: notice_info) = 
+#		{ return (n$note == SSH::SSH_Login && /lib/ in n$aux["client"]); },
 #	 $result = NOTICE_EMAIL],
 #
 #	# Send email if a password guesser logs in successfully anywhere
@@ -131,6 +136,7 @@ event check_ssh_connection(c: connection, done: bool)
 			        $conn=c,
 			        $msg=fmt("SSH password guessing by %s", c$id$orig_h),
 			        $sub=fmt("%d failed logins", password_rejections[c$id$orig_h]$n),
+			        $aux=table(["client"]=ssh_conn$client, ["country"]=location$country_code),
 			        $n=password_rejections[c$id$orig_h]$n]);
 			}
 		} 
@@ -150,6 +156,7 @@ event check_ssh_connection(c: connection, done: bool)
 			        $conn=c,
 			        $n=password_rejections[c$id$orig_h]$n,
 			        $msg=fmt("Successful SSH login by password guesser %s", c$id$orig_h),
+			        $aux=table(["client"]=ssh_conn$client, ["country"]=location$country_code),
 			        $sub=fmt("%d failed logins", password_rejections[c$id$orig_h]$n)]);
 			}
 
@@ -161,7 +168,7 @@ event check_ssh_connection(c: connection, done: bool)
 		NOTICE([$note=SSH_Login,
 		        $conn=c,
 		        $msg=message,
-		        $sub=location$country_code]);
+		        $aux=table(["client"]=ssh_conn$client, ["country"]=location$country_code)]);
 		
 		# Check to see if this login came from a weird hostname (nameserver, mail server, etc.)
 		when( local hostname = lookup_addr(c$id$orig_h) )
@@ -171,6 +178,7 @@ event check_ssh_connection(c: connection, done: bool)
 				NOTICE([$note=SSH_Login_From_Strange_Hostname,
 				        $conn=c,
 				        $msg=fmt("Strange login from %s", hostname),
+				        $aux=table(["client"]=ssh_conn$client, ["country"]=location$country_code),
 				        $sub=hostname]);
 				}
 			}
