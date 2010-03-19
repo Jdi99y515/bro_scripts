@@ -14,11 +14,11 @@
 +	for ( a in n$aux )
 +		message = fmt("%As%s=%s\n", message, a, n$aux[a]);
 +	}
-+	if ( n?$conn )
++	if ( n?$id )
 +	{
 +	local id_string = fmt("%s/%d > %s/%d",
-+		     n$conn$id$orig_h, n$conn$id$orig_p,
-+		     n$conn$id$resp_h, n$conn$id$resp_p);
++		     n$id$orig_h, n$id$orig_p,
++		     n$id$resp_h, n$id$resp_p);
 +	message = fmt("%Asconn=%s\n", message, id_string);
 +	}
 +
