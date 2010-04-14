@@ -3,7 +3,7 @@
 module HTTP;
 
 export {
-    const local_domains = /(^|\.)albany\.edu$/ &redef;
+    const local_domains = /(^|\.)albany\.edu($|:)/ &redef;
 }
 
 event http_ext(id: conn_id, si: http_ext_session_info) &priority=10
