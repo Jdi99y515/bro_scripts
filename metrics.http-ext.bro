@@ -5,7 +5,7 @@
 @load http-ext
 
 export {
-    global http_metrics: table[string] of count &default=0 &synchronized;
+    global http_metrics: table[string] of count &default=0; #&synchronized;
     global http_metrics_interval = +60sec;
     const http_metrics_log = open_log_file("http-ext-metrics");
 }
