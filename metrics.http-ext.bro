@@ -14,12 +14,14 @@ event http_write_stats()
     {
     if (http_metrics["total"]!=0)
         {
-        print http_metrics_log, fmt("http_metrics time=%.6f total=%d inbound=%d outbound=%d exe_download=%d",
+        print http_metrics_log, fmt("http_metrics time=%.6f total=%d inbound=%d outbound=%d video_download=%d youtube_watches=%d",
             network_time(),
             http_metrics["total"],
             http_metrics["inbound"],
             http_metrics["outbound"],
-            http_metrics["exe_download"]);
+            http_metrics["video_download"],
+            http_metrics["youtube_watches"]
+            );
         clear_table(http_metrics);
         }
     schedule http_metrics_interval { http_write_stats() };
@@ -40,7 +42,9 @@ event http_ext(id: conn_id, si: http_ext_session_info) &priority=-10
     else
         ++http_metrics["inbound"];
 
-    if (/\.exe$/ in si$uri)
-        ++http_metrics["exe_download"];
-    }
+    if (/\.(avi|flv|mp4|mpg)/ in si$uri)
+        ++http_metrics["video_download"];
+    if (/watch\?v=/ in si$uri && /youtube/ in si$host)
+        ++http_metrics["youtube_watches"];
 
+    }
