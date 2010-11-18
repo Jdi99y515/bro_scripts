@@ -5,7 +5,7 @@
 @load smtp-ext
 
 export {
-    global smtp_metrics: table[string] of count &default=0 &synchronized;
+    global smtp_metrics: table[string] of count &default=0; #&synchronized;
     global smtp_metrics_interval = +60sec;
     const smtp_metrics_log = open_log_file("smtp-ext-metrics");
 }
