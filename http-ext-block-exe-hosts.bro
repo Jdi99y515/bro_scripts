@@ -10,6 +10,7 @@ export {
 
     const bad_exec_domains = 
         /co\.cc/
+      | /cx\.cc/
       | /cz\.cc/
         &redef;
 
