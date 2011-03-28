@@ -17,6 +17,7 @@ export {
     const bad_exec_urls = 
         /php.adv=/
       | /http:\/\/[0-9]{1,3}\.[0-9]{1,3}.*\/index\.php\?[^=]+=[^=]+$/ #try to match http://1.2.3.4/index.php?foo=bar
+      | /load.php/
         &redef;
 
     const bad_user_agents = 
