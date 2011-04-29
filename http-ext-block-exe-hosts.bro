@@ -12,6 +12,7 @@ export {
         /co\.cc/
       | /cx\.cc/
       | /cz\.cc/
+      | /^www1/
         &redef;
 
     const bad_exec_urls = 
