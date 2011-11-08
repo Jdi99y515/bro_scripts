@@ -8,8 +8,8 @@ cp *.bro $DIR
 
 cd $DIR || exit 1
 
-bro -f ip -C  -r $FILE urlsnarf.bro || true
+bro -f ip -C  -r $FILE || true
 
-cat http-requests.log|cf
+cat http.log | cf
 
 rm -rf $DIR
