@@ -15,7 +15,7 @@ event bro_init()
 {
     Metrics::add_filter(HTTP_REQUEST_SIZE_BY_HOST,
                 [$name="all",
-                 $break_interval=3600secs
+                 $break_interval=600secs
                 ]);
 
 }
@@ -24,7 +24,7 @@ event bro_init()
 event connection_finished(c: connection)
 {
     if (c?$resp_hostname) {
-        local size = c$orig$size + c$resp$size;
+        local size = c$orig$num_bytes_ip + c$resp$num_bytes_ip;
         Metrics::add_data(HTTP_REQUEST_SIZE_BY_HOST, [$str=c$resp_hostname], size);
     }
 }
