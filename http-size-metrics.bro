@@ -18,6 +18,7 @@ event bro_init()
                  $break_interval=3600secs
                 ]);
 
+}
 
 
 event connection_finished(c: connection)
