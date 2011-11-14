@@ -20,7 +20,7 @@ event http_header(c: connection, is_orig: bool, name: string, value: string) &pr
         return;
     local ip = c$id$orig_h;
 
-    if (!is_local_addr(ip) || ip in wireless_nets || ip in rogue_access_points)
+    if (!Site::is_local_addr(ip) || ip in wireless_nets || ip in rogue_access_points)
         return;
 
     if ( name == "USER-AGENT" && mobile_browsers in value){
