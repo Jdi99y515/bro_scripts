@@ -8,6 +8,6 @@ cd $DIR || exit 1
 
 bro -f 'not ip6'  -C  -r $FILE || true
 
-cat http.log | cf
+cat http.log | bro-cut -d -c
 
 rm -rf $DIR
