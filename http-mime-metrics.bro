@@ -14,7 +14,7 @@ event bro_init()
 
 event HTTP::log_http(rec: HTTP::Info)
 {
-    if(Site::is_local_addr(rec$id$resp_h) && rec?$mime_type) {
+    if(Site::is_local_addr(rec$id$orig_h) && rec?$mime_type) {
         Metrics::add_data(HTTP_MIME_METRICS, [$str=rec$mime_type], rec$response_body_len);
     }
 }
