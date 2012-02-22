@@ -77,7 +77,7 @@ event dns_request(c: connection, msg: dns_msg, query: string, qtype: count, qcla
         local ident = fmt("%s-%s", orig_h, resp_h);
         NOTICE([$note=note,
                 $msg=nmsg,
-                $sub=fmt("%s", resp_h),
+                $sub=hostname,
                 $identifier=ident,
                 $conn=c]);
         
