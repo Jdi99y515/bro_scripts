@@ -14,6 +14,7 @@ export {
         8.8.4.4/32, #google dns
         208.67.220.123/32, #opendns
         208.67.222.222/32, #opendns
+        208.67.220.220/32, #opendns
     } &redef;
 
 }
