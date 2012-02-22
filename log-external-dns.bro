@@ -80,10 +80,7 @@ event dns_request(c: connection, msg: dns_msg, query: string, qtype: count, qcla
                 $sub=hostname,
                 $identifier=ident,
                 $conn=c]);
-        
     }
-
-
 }
 
 event bro_init()
@@ -93,8 +90,6 @@ event bro_init()
                                 $exclude = set("uid", "proto", "trans_id","qclass", "qclass_name", "qtype", "rcode",
                                 "QR","AA","TC","RD","RA","Z","answers","TTLs"),
                                 $pred(rec: DNS::Info) = {
-
-        return rec$is_external==T;
-            return F;
+        return rec$is_external;
     } ]);
 }
