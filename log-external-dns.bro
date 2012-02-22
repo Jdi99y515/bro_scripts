@@ -79,6 +79,7 @@ event dns_request(c: connection, msg: dns_msg, query: string, qtype: count, qcla
                 $msg=nmsg,
                 $sub=hostname,
                 $identifier=ident,
+                $remote_location=loc,
                 $conn=c]);
     }
 }
