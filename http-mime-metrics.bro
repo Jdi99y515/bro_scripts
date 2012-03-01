@@ -8,7 +8,7 @@ event bro_init()
 {
     Metrics::add_filter(HTTP_MIME_METRICS,
                 [$name="all",
-                 $break_interval=3600secs
+                 $break_interval=600secs
                 ]);
 }
 
