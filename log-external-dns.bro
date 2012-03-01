@@ -27,11 +27,6 @@ export {
         EXTERNAL_FOREIGN_DNS,
     };
 
-    redef Notice::type_suppression_intervals += {
-        [EXTERNAL_DNS] = 12hr,
-        [EXTERNAL_FOREIGN_DNS] = 12hr,
-    };
-
     const local_countries: set[string] = {
         "US",
     } &redef;
@@ -80,6 +75,7 @@ event dns_request(c: connection, msg: dns_msg, query: string, qtype: count, qcla
                 $sub=hostname,
                 $identifier=ident,
                 $remote_location=loc,
+                $suppress_for=1day,
                 $conn=c]);
     }
 }
