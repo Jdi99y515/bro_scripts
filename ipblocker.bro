@@ -1,16 +1,24 @@
-function notice_exec_ipblocker(n: notice_info, a: NoticeAction): NoticeAction
-{
-    local cmd = fmt("lckdo /tmp/bro_ipblocker_%s /usr/local/bin/bro_ipblocker_block %s", n$id$orig_h, n$id$orig_h);
-    execute_with_notice(cmd, n);
-    email_notice_to(n, mail_dest);
-    return NOTICE_ALARM_ALWAYS;
+module Notice;
+
+export {
+    redef enum Action += {
+        ## Indicates that the notice should be sent to ipblocker to block
+        ACTION_IPBLOCKER
+    };
 }
 
-function notice_exec_ipblocker_dest(n: notice_info, a: NoticeAction): NoticeAction
+event notice(n: Notice::Info) &priority=-5
 {
-    local cmd = fmt("lckdo /tmp/bro_ipblocker_%s /usr/local/bin/bro_ipblocker_block %s", n$id$resp_h, n$id$resp_h);
-    execute_with_notice(cmd, n);
-    email_notice_to(n, mail_dest);
-    return NOTICE_ALARM_ALWAYS;
-}
+    if (ACTION_IPBLOCKER !in n$actions)
+        return;
+    local id = n$id;
+    
+    # The IP to block is whichever one is not the local address.
+    if(Site::is_local_addr(id$orig_h))
+        local ip = id$resp_h;
+    else
+        local ip = id$orig_h;
 
+    local cmd = fmt("/usr/local/bin/bro_ipblocker_block %s", ip);
+    execute_with_notice(cmd, n);
+}
