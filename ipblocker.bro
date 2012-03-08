@@ -21,10 +21,11 @@ event notice(n: Notice::Info) &priority=-5
     local id = n$id;
     
     # The IP to block is whichever one is not the local address.
+    local ip: addr;
     if(Site::is_local_addr(id$orig_h))
-        local ip = id$resp_h;
+        ip = id$resp_h;
     else
-        local ip = id$orig_h;
+        ip = id$orig_h;
 
     local cmd = fmt("/usr/local/bin/bro_ipblocker_block %s", ip);
     execute_with_notice(cmd, n);
