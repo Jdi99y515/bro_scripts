@@ -5,6 +5,13 @@ export {
         ## Indicates that the notice should be sent to ipblocker to block
         ACTION_IPBLOCKER
     };
+    const ipblocker_types: set[Notice::Type] = {} &redef;
+    ## Add a helper to the notice policy for blocking addresses
+    redef Notice::policy += {
+            [$pred(n: Notice::Info) = { return (n$note in Notice::ipblocker_types); },
+             $action = ACTION_IPBLOCKER,
+             $priority = 10],
+    };
 }
 
 event notice(n: Notice::Info) &priority=-5
