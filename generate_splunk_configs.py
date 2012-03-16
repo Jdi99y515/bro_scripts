@@ -45,11 +45,17 @@ def generate(log_dir, out_dir):
         p.write('SHOULD_LINEMERGE = false\n')
         p.write('given_type = csv\n')
         p.write('pulldown_type = true\n')
+        p.write('TRANSFORMS-commentsToNull = bro-ignore-comments\n')
         p.write('REPORT-AutoHeader = AutoHeader-%s\n\n' % sourcetype)
 
         t.write('[AutoHeader-%s]\n' % sourcetype)
         t.write('DELIMS = "\t"\n')
         t.write('FIELDS = %s\n\n' % fields_str)
+
+    t.write('[bro-ignore-comments]\n')
+    t.write('REGEX = "^#.*"\n')
+    t.write('DEST_KEY = queue\n')
+    t.write('FORMAT = nullQueue\n')
 
 if __name__ == "__main__":
     log_dir = sys.argv[1]
