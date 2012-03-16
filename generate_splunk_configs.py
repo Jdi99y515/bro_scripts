@@ -3,6 +3,14 @@ import sys
 import os
 import glob
 
+field_renames = {
+    'host': 'src',
+    'source': 'src',
+}
+
+def rename_field(f):
+    return field_renames.get(f, f)
+
 def read_log_file(log_file):
     f = open(log_file)
     header = [f.readline().strip() for _ in range(10)]
@@ -33,7 +41,7 @@ def generate(log_dir, out_dir):
     for fn, fields in sorted(data.items()):
         print fn
         sourcetype = "bro_" + os.path.basename(fn).replace(".log",'')
-        fields_str = ', '.join(['"%s"' % f for f in fields])
+        fields_str = ', '.join(['"%s"' % rename_field(f) for f in fields])
 
         i.write('[monitor://%s]\n' % fn)
         i.write('disabled = false\n')
