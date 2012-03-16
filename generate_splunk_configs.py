@@ -42,7 +42,7 @@ def generate(log_dir, out_dir):
 
         p.write('[%s]\n' % sourcetype)
         p.write('KV_MODE = none\n')
-        p.write('SHOULD_LINEMERGE = False\n')
+        p.write('SHOULD_LINEMERGE = false\n')
         p.write('given_type = csv\n')
         p.write('pulldown_type = true\n')
         p.write('REPORT-AutoHeader = AutoHeader-%s\n\n' % sourcetype)
