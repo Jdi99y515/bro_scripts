@@ -22,7 +22,7 @@ def read_log_files(log_files):
     return logs
 
 def generate(log_dir, out_dir):
-    log_files = glob.glob(os.path.join(log_dir, "*"))
+    log_files = glob.glob(os.path.join(log_dir, "*.log"))
 
     data = read_log_files(log_files)
 
