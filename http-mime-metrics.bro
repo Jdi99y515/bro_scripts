@@ -1,12 +1,8 @@
 @load base/frameworks/metrics
 
-redef enum Metrics::ID += {
-    HTTP_MIME_METRICS,
-};
-
 event bro_init()
 {
-    Metrics::add_filter(HTTP_MIME_METRICS,
+    Metrics::add_filter("http.mime",
                 [$name="all",
                  $break_interval=600secs
                 ]);
@@ -15,6 +11,6 @@ event bro_init()
 event HTTP::log_http(rec: HTTP::Info)
 {
     if(Site::is_local_addr(rec$id$orig_h) && rec?$mime_type) {
-        Metrics::add_data(HTTP_MIME_METRICS, [$str=rec$mime_type], rec$response_body_len);
+        Metrics::add_data("http.mime", [$str=rec$mime_type], rec$response_body_len);
     }
 }
