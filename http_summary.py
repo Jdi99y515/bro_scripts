@@ -27,8 +27,8 @@ ipregex = re.compile(ipregex)
 
 def simplify(hostname):
 
-    if ipregex.match(hostname):
-        return '.'.join(hostname.split(".")[0:3])
+    if hostname[0].isdigit() and ipregex.match(hostname):
+        return hostname.rsplit(".", 1)[0]
 
     parts = hostname.split(".")
 
