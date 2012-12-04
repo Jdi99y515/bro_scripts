@@ -1,16 +1,7 @@
-# $Id$
-
-@load site
-@load notice
-
-# Ugly: we need the following from conn.bro, but we can't soundly load
-# it because it in turn loads us.
-global full_id_string: function(c: connection): string;
-
 module TerminateConnection;
 
 export {
-	redef enum Notice += {
+	redef enum Notice::Type += {
 		TerminatingConnection,	# connection will be terminated
 		TerminatingConnectionIgnored,	# connection terminated disabled
 	};
@@ -24,13 +15,19 @@ export {
 
 }
 
+function full_id_string(c: connection): string
+    {
+    local id = c$id;
+    return fmt("%s:%s -> %s:%s", id$orig_h, id$orig_p, id$resp_h, id$resp_p);
+    }
+
 function terminate_connection(c: connection)
 	{
 	local id = c$id;
 
 	if ( activate_terminate_connection )
 		{
-		local local_init = is_local_addr(id$orig_h);
+		local local_init = Site::is_local_addr(id$orig_h);
 
 		local term_cmd = fmt("rst %s -n 32 -d 20 %s %d %d %s %d %d",
 					local_init ? "-R" : "",
