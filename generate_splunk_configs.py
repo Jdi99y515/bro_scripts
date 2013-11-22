@@ -61,7 +61,7 @@ def generate(log_dir, out_dir):
         t.write('FIELDS = %s\n\n' % fields_str)
 
     t.write('[bro-ignore-comments]\n')
-    t.write('REGEX = "^#.*"\n')
+    t.write('REGEX = ^#\n')
     t.write('DEST_KEY = queue\n')
     t.write('FORMAT = nullQueue\n')
 
