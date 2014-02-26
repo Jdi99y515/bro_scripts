@@ -1,0 +1,18 @@
+#!/usr/local/python_env/bin/python
+import sys
+from ipblocker import block_ip, ok_to_block
+
+def block(ip, sub, comment):
+    if ok_to_block(ip):
+        flag_traffic = 'http' in comment
+        block_ip(ip=ip, who="bro", comment=comment, duration=60*60*24*7, flag_traffic=flag_traffic)
+
+def main():
+    lines = sys.stdin.read().strip().split("\n")
+    ip, note, msg, sub = lines
+
+    comment = "%s: %s" % (note, msg)
+    block(ip, sub, comment)
+
+if __name__ == "__main__":
+    main()
